@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# PhoenixCheat Bot V27 - Complete & Bug-Free
+# PhoenixCheat Bot V28 - Debugged & Optimized
 
 import json
 import os
@@ -37,7 +37,7 @@ DEFAULT_DATA = {
         "price_per_1000": 25000,
         "price_antiban": 50000,
         "price_fast": 20000,
-        "registration_open": True,
+        "registration_open": True, # کلید باز/بسته بودن سایت
         "special_discount_text": "🎁 تخفیف ویژه",
         "special_coupon_code": "",
         "special_coupon_end_time": "",
@@ -48,8 +48,8 @@ DEFAULT_DATA = {
     },
     "coupons": [], 
     "texts": {
-        "site_name": "فونیکس چیت",
-        "welcome_title": "به فروشگاه فونیکس چیت خوش آمدید",
+        "site_name": "CHEAT CALL OF",
+        "welcome_title": "سلام به فروشگاه CHEAT CALL OF خوش اومدی",
         "welcome_text1": "ما مفتخریم که به عنوان یکی از پیشگامان و معتبرترین مراجع تخصصی در حوزه خدمات گیمینگ (به‌ویژه Call of Duty) در خدمت شما هستیم.",
         "welcome_text2": "تیم متخصص ما با تکیه بر دانش فنی و تجربه چندین ساله، بستری امن، سریع و تضمینی را برای ارتقاء تجربه بازی شما فراهم کرده است.",
         "about_text": "ما یه تیم حرفه‌ای از گیمرهای کالاف دیوتی هستیم.",
@@ -91,7 +91,8 @@ def get_settings():
     return jsonify({
         "texts": db.get("texts", {}),
         "settings": db.get("settings", {}),
-        "special_coupon": db["settings"].get("special_coupon_code", "")
+        "special_coupon": db["settings"].get("special_coupon_code", ""),
+        "site_status": db["settings"].get("registration_open", True) # ارسال وضعیت باز/بسته بودن
     })
 
 @app_web.route("/api/track", methods=["POST"])
@@ -123,6 +124,11 @@ def payment_info():
     try:
         data = request.form
         db = load_data()
+        
+        # چک کردن بسته بودن سایت
+        if not db["settings"].get("registration_open", True):
+            return jsonify({"success": False, "message": "سایت موقتا بسته است."}), 403
+
         oid = db.get("next_order_id", 1)
         
         receipt = request.files.get('receipt')
@@ -156,6 +162,7 @@ def final_order():
         code = data.get("order_code")
         db = load_data()
         
+        order_to_send = None
         for o in db["orders"]:
             if o["code"] == code:
                 o["email"] = data.get("email", "")
@@ -163,10 +170,15 @@ def final_order():
                 o["rubika"] = data.get("rubika", "")
                 o["desc"] = data.get("desc", "")
                 o["status"] = "pending"
+                order_to_send = o # ذخیره آردر آپدیت شده در متغیر
                 break
         
-        save_data(db)
-        send_account_msg(code)
+        save_data(db) # اول ذخیره میکنیم
+        
+        if order_to_send:
+            # اینبار آبجکت آپدیت شده رو مستقیم میفرستیم به تلگرام که دیگه فایل رو نخونه
+            send_account_msg(order_to_send)
+            
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -195,11 +207,9 @@ def send_payment_msg(order, receipt_path):
         loop.close()
     except Exception as e: print(f"TG Error: {e}")
 
-def send_account_msg(code):
+def send_account_msg(order):
+    # این تابع الان آردر رو به صورت پارامتر میگیره، نه از فایل
     if not bot_app: return
-    db = load_data()
-    order = next((o for o in db["orders"] if o["code"] == code), None)
-    if not order: return
     try:
         text = (
             f"👤 **اطلاعات اکانت (سفارش {order['code']})**\n\n"
@@ -222,24 +232,36 @@ def get_main_menu():
         [InlineKeyboardButton("📝 ویرایش متن‌ها", callback_data="menu_texts")],
         [InlineKeyboardButton("💰 تنظیم قیمت‌ها", callback_data="menu_prices"), InlineKeyboardButton("🎟️ کد تخفیف", callback_data="menu_coupons")],
         [InlineKeyboardButton("🎁 تخفیف ویژه", callback_data="menu_special")],
-        [InlineKeyboardButton("💳 تنظیم کارت", callback_data="menu_card"), InlineKeyboardButton("🔐 باز/بسته", callback_data="menu_toggle_reg")],
+        [InlineKeyboardButton("💳 تنظیم کارت", callback_data="menu_card")],
+        [InlineKeyboardButton("🔐 وضعیت سایت (باز/بسته)", callback_data="menu_toggle_reg")],
     ]
 
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
     USER_STATES.pop(ADMIN_ID, None)
-    await update.message.reply_text("🎮 **پنل مدیریت PhoenixCheat**", reply_markup=InlineKeyboardMarkup(get_main_menu()), parse_mode="Markdown")
+    
+    # 🚀 رفع باگ دیر باز شدن پنل: استفاده از try/except و جلوگیری از بلاک شدن
+    try:
+        await update.message.reply_text("🎮 **پنل مدیریت CHEAT CALL OF**", reply_markup=InlineKeyboardMarkup(get_main_menu()), parse_mode="Markdown")
+    except Exception as e:
+        print(f"Error in start: {e}")
 
 async def button_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    
+    # 🚀 رفع باگ اسپم: خیلی سریع به تلگرام جواب میدیم که لودینگ دکمه قطع بشه
+    try:
+        await query.answer()
+    except:
+        pass
+        
     data = query.data
     db = load_data()
     s = db["settings"]
 
     if data == "back":
         USER_STATES.pop(ADMIN_ID, None)
-        await query.edit_message_text("🎮 **پنل مدیریت PhoenixCheat**", reply_markup=InlineKeyboardMarkup(get_main_menu()), parse_mode="Markdown")
+        await query.edit_message_text("🎮 **پنل مدیریت CHEAT CALL OF**", reply_markup=InlineKeyboardMarkup(get_main_menu()), parse_mode="Markdown")
 
     # --- آمار دقیق ---
     elif data == "menu_stats":
@@ -288,7 +310,7 @@ async def button_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         USER_STATES[ADMIN_ID] = {"state": "waiting_price_antiban"}
         await query.edit_message_text(f"قیمت فعلی انتی بن: {s['price_antiban']:,} ت\nقیمت جدید انتی بن رو بفرست:")
     
-    # --- پکیج ها (با قابلیت حذف) ---
+    # --- پکیج ها ---
     elif data == "pkg_list":
         text = "📦 **مدیریت پکیج‌ها**\n\nبرای ویرایش یا حذف، روی دکمه‌ها بزن:\n"
         kb = []
@@ -421,10 +443,12 @@ async def button_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await query.answer("وضعیت تغییر کرد.", show_alert=True)
         await button_handler(update, ctx)
     
+    # --- باز/بسته کردن سایت ---
     elif data == "menu_toggle_reg":
         s["registration_open"] = not s.get("registration_open", True)
         save_data(db)
-        await query.answer("وضعیت ثبت‌نام تغییر کرد.", show_alert=True)
+        status_text = "باز شد" if s["registration_open"] else "بسته شد"
+        await query.answer(f"سایت {status_text}!", show_alert=True)
         await button_handler(update, ctx)
 
 async def show_date_picker(query, state):
@@ -500,13 +524,14 @@ def run_flask():
 
 def run_bot():
     global bot_app
+    # درست کردن ربات با تنظیمات بهینه
     bot_app = Application.builder().token(BOT_TOKEN).build()
     bot_app.add_handler(CommandHandler("start", start))
     bot_app.add_handler(CallbackQueryHandler(button_handler))
     bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     
     print("🚀 Bot is polling...")
-    bot_app.run_polling(drop_pending_updates=True)
+    bot_app.run_polling(drop_pending_updates=True) # drop_pending_updates برای رفع باگ اسپم
 
 if __name__ == "__main__":
     print("🌐 Starting Web Server...")

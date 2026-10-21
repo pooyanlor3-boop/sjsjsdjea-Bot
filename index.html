@@ -43,6 +43,11 @@ body{
 #preloader{position:fixed;inset:0;background:var(--black);display:grid;place-items:center;z-index:9999;transition:opacity 0.5s}#preloader.hide{opacity:0;pointer-events:none}
 .pre-spinner{width:60px;height:60px;border:4px solid rgba(255,215,0,0.2);border-top-color:var(--red);border-right-color:var(--fire-blue);border-radius:50%;animation:spin 0.8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 
+/* صفحه قفل سایت */
+#lockedScreen{display:none; position:fixed; inset:0; background:var(--black); z-index:9998; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;}
+#lockedScreen h1{color:var(--red); font-size:24px; margin-bottom:15px; text-shadow:0 0 20px rgba(230,0,0,0.5);}
+#lockedScreen p{color:var(--gray); font-size:14px; line-height:2;}
+
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 0;margin-bottom:18px;position:relative}
 .header-glow{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--fire-red),var(--fire-blue),transparent);box-shadow:0 0 15px var(--fire-blue);}
 .brand{display:flex;align-items:center;gap:12px}
@@ -101,15 +106,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 .form-group input,.form-group textarea{width:100%;background:rgba(10,10,10,0.8);border:1px solid rgba(230,0,0,0.2);border-radius:12px;padding:14px 16px;color:var(--white);font-size:13px;font-family:inherit;outline:none;transition:all 0.3s}
 .form-group input:focus,.form-group textarea:focus{border-color:var(--fire-blue);box-shadow:0 0 20px rgba(0,191,255,0.3)}
 
-/* رفع باگ سفید شدن کپی/پیست */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
-    -webkit-box-shadow: 0 0 0 30px #0a0a0a inset !important;
-    -webkit-text-fill-color: white !important;
-    transition: background-color 5000s ease-in-out 0s;
-}
+input:-webkit-autofill,input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{-webkit-box-shadow: 0 0 0 30px #0a0a0a inset !important;-webkit-text-fill-color: white !important;transition: background-color 5000s ease-in-out 0s;}
 
 .form-row{display:flex;gap:10px;margin-bottom:15px}.form-row .form-group{flex:1;margin-bottom:0}
 .form-group input.error{border-color:var(--red);box-shadow:0 0 15px rgba(230,0,0,0.4)}
@@ -125,9 +122,6 @@ input:-webkit-autofill:active{
 .cp-btn{background:var(--panel);border:1px solid var(--fire-red);color:var(--fire-red);width:40px;height:40px;border-radius:10px;font-size:20px;font-weight:900;cursor:pointer;transition:0.3s}
 .cp-btn:hover{background:var(--fire-red);color:var(--black)}
 .cp-input{flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(230,0,0,0.5);color:var(--white);text-align:center;font-size:18px;font-weight:700;border-radius:10px;padding:10px;direction:ltr}
-.quick-cps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
-.quick-cp{background:rgba(230,0,0,0.1);border:1px solid rgba(230,0,0,0.3);color:var(--gray);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;transition:0.3s}
-.quick-cp:hover{background:var(--fire-red);color:var(--black)}
 
 .option-card{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.3s;position:relative}
 .option-card.active{border-color:var(--fire-red);background:rgba(230,0,0,0.1);box-shadow:0 0 15px rgba(230,0,0,0.2)}
@@ -199,7 +193,6 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
 </head>
 <body>
 
-<!-- لوگوی پرنده آتشین SVG -->
 <svg width="0" height="0">
   <defs>
     <linearGradient id="fireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -214,6 +207,12 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
 <div class="particles" id="particles"></div>
 <div id="preloader"><div class="pre-spinner"></div></div>
 
+<!-- صفحه قفل (وقتی ادمین سایت رو میبنده) -->
+<div id="lockedScreen">
+  <h1>🔒 سایت موقتا بسته است</h1>
+  <p>فروشگاه در حال آپدیت و بروزرسانی میباشد.<br>لطفاً چند دقیقه دیگر مراجعه کنید.</p>
+</div>
+
 <div class="app">
 <button class="global-back-btn" id="globalBackBtn" onclick="goBackHistory()" style="display:none;">→</button>
 
@@ -221,7 +220,6 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
   <div class="header-glow"></div>
   <div class="brand">
     <div class="logo-container">
-      <!-- پرنده آتشین (ققنوس) -->
       <svg viewBox="0 0 100 100">
         <path d="M 50 15 C 60 25 75 30 90 25 C 80 40 65 45 55 55 C 70 65 80 85 50 95 C 20 85 30 65 45 55 C 35 45 20 40 10 25 C 25 30 40 25 50 15 Z" fill="url(#fireGradient)" />
         <circle cx="50" cy="45" r="4" fill="#ffaa00" />
@@ -259,7 +257,6 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
   <div class="hero">
     <div class="hero-content">
       <span class="badge" id="welcomeBadge">🔥 CHEAT CALL OF</span>
-      <!-- متن خوش آمدگویی اینجا تغییر کرد -->
       <h2 id="welcomeTitle">سلام به فروشگاه <span class="neon">CHEAT CALL OF</span> خوش اومدی</h2>      
       <p id="welcomeText1">ما مفتخریم که به عنوان یکی از پیشگامان و معتبرترین مراجع تخصصی در حوزه خدمات گیمینگ (به‌ویژه Call of Duty) در خدمت شما هستیم.</p>
       <p id="welcomeText2">تیم متخصص ما با تکیه بر دانش فنی و تجربه چندین ساله، بستری امن، سریع و تضمینی را برای ارتقاء تجربه بازی شما فراهم کرده است.</p>
@@ -301,7 +298,6 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
       <button class="cp-btn" onclick="changeCP(1000)">+</button>
     </div>
     
-    <!-- پکیج‌های تخفیف‌دار -->
     <div style="background:rgba(255,215,0,0.05);border:1px dashed var(--orange);padding:10px;border-radius:10px;margin-bottom:20px;">
       <p style="font-size:11px;color:var(--gold);margin-bottom:10px;">🔥 پکیج‌های تخفیف‌دار ما (برای اعمال، روی عدد کلیک کنید):</p>
       <div id="discountPackages" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -524,17 +520,6 @@ footer .gradient{background:linear-gradient(90deg,var(--fire-red),var(--fire-blu
 </div>
 
 <script>
-// 🌟 تایمر امنیتی برای بستن اجباری لودینگ در صورت ارور یا کندی سرور
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const preloader = document.getElementById('preloader');
-        if (preloader && !preloader.classList.contains('hide')) {
-            preloader.classList.add('hide');
-            setTimeout(() => preloader.remove(), 600);
-        }
-    }, 5000); // حداکثر 5 ثانیه
-});
-
 let PRICE_PER_1000_CP = 25000;
 let ANTIBAN_PRICE = 50000;
 let FAST_DELIVERY_PRICE = 20000;
@@ -549,7 +534,6 @@ let order = {
   senderCard: '', sentAmount: 0, sentTime: '', email: '', pass: '', rubika: '', desc: '', coupon: '', discount: 0, discountType: ''
 };
 
-// ================= افکت‌ها =================
 function createParticles() {
   const container = document.getElementById('particles');
   for(let i=0; i<40; i++) {
@@ -633,7 +617,6 @@ function goBackHistory() {
     }
 }
 
-// ================= محاسبات قیمت (هوشمند) =================
 function calculateTotal(){
   let cpInput = document.getElementById('cpAmount');
   let val = parseInt(cpInput.value) || 0;
@@ -650,12 +633,10 @@ function calculateTotal(){
   let basePrice = 0;
   let packages = SETTINGS.custom_packages || [];
   
-  // 1. چک پکیج ثابت
   let exactMatch = packages.find(p => p.cp === val);
   if (exactMatch) {
       basePrice = exactMatch.price;
   } else {
-      // 2. نرخ متغیر
       let rate = SETTINGS.price_per_1000 || 25000;
       basePrice = Math.ceil(val / 1000) * rate;
   }
@@ -681,7 +662,6 @@ function toggleOption(opt){ if(opt === 'antiban'){ order.antiban = !order.antiba
 function toggleSpeed(speed){ order.speed = speed; document.getElementById('optNormal').classList.toggle('active', speed === 'normal'); document.getElementById('optFast').classList.toggle('active', speed === 'fast'); calculateTotal(); }
 toggleSpeed('normal');
 
-// ================= کد تخفیف =================
 function resetCouponStatus() {
     document.getElementById('btnCheckCoupon').style.display = 'block';
     document.getElementById('btnApplyCoupon').style.display = 'none';
@@ -861,6 +841,15 @@ async function loadSettings(){
   try {
     const res = await fetch('/api/settings');
     const data = await res.json();
+    
+    // بررسی وضعیت بسته یا باز بودن سایت
+    if (data.site_status === false) {
+        document.getElementById('preloader').style.display = 'none';
+        document.getElementById('lockedScreen').style.display = 'flex';
+        document.querySelector('.app').style.display = 'none';
+        return;
+    }
+
     TEXTS = data.texts || {}; SETTINGS = data.settings || {};
     PRICE_PER_1000_CP = SETTINGS.price_per_1000 || 25000;
     ANTIBAN_PRICE = SETTINGS.price_antiban || 50000;
@@ -877,13 +866,11 @@ async function loadSettings(){
     document.getElementById('lblFastPrice').textContent = '+' + FAST_DELIVERY_PRICE.toLocaleString('fa-IR');
 
     let siteName = TEXTS.site_name || "CHEAT CALL OF";
-    // 🌟 تغییر متن خوش آمدگویی در جاوااسکریپت
     document.getElementById('welcomeTitle').innerHTML = `سلام به فروشگاه <span class="neon">${siteName}</span> خوش اومدی`;
     document.getElementById('welcomeText1').textContent = TEXTS.welcome_text1 || "ما مفتخریم...";
     document.getElementById('welcomeText2').textContent = TEXTS.welcome_text2 || "تیم متخصص ما...";
     document.getElementById('aboutBody').textContent = TEXTS.about_text || "ما یه تیم حرفه‌ای از گیمرهای کالاف دیوتی هستیم.";
 
-    // پکیج‌ها
     let pkgDiv = document.getElementById('discountPackages');
     pkgDiv.innerHTML = '';
     (SETTINGS.custom_packages || []).forEach(p => {
@@ -936,7 +923,6 @@ async function loadSettings(){
   } catch(err){
     console.log("Error loading settings:", err);
   } finally {
-    // بستن لودینگ در هر شرایطی
     let preloader = document.getElementById('preloader');
     if (preloader) {
         preloader.classList.add('hide'); 
